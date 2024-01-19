@@ -1,7 +1,9 @@
 package kz.nearbygems.cashcard;
 
 import java.net.URI;
+import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,27 +17,31 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+
 @RestController
 @RequestMapping("/cashcards")
 class CashCardController {
 
-  private final CashCardRepository cashCardRepository;
+  private final CashCardRepository cardRepository;
   private final static Sort DEFAULT = Sort.by(Sort.Direction.ASC, "amount");
 
   private CashCardController(CashCardRepository cashCardRepository) {
-    this.cashCardRepository = cashCardRepository;
+    this.cardRepository = cashCardRepository;
   }
 
   @GetMapping("/{requestedId}")
-  private ResponseEntity<CashCard> findById(@PathVariable Long requestedId) {
-    return cashCardRepository.findById(requestedId)
-                             .map(ResponseEntity::ok)
-                             .orElseGet(() -> ResponseEntity.notFound().build());
+  private ResponseEntity<CashCard> findById(@PathVariable Long requestedId,
+                                            Principal principal) {
+    return Optional.ofNullable(cardRepository.findByIdAndOwner(requestedId, principal.getName()))
+                   .map(ResponseEntity::ok)
+                   .orElseGet(() -> ResponseEntity.notFound().build());
   }
 
   @GetMapping
-  private ResponseEntity<List<CashCard>> findAll(Pageable pageable) {
-    Page<CashCard> page = cashCardRepository.findAll(PageRequest.of(pageable.getPageNumber(),
+  private ResponseEntity<List<CashCard>> findAll(Pageable pageable,
+                                                 Principal principal) {
+    Page<CashCard> page = cardRepository.findByOwner(principal.getName(),
+                                                     PageRequest.of(pageable.getPageNumber(),
                                                                     pageable.getPageSize(),
                                                                     pageable.getSortOr(DEFAULT)));
     return ResponseEntity.ok(page.getContent());
@@ -43,9 +49,14 @@ class CashCardController {
 
   @PostMapping
   private ResponseEntity<Void> createCashCard(@RequestBody CashCard newCashCardRequest,
-                                              UriComponentsBuilder ucb) {
+                                              UriComponentsBuilder ucb,
+                                              Principal principal) {
 
-    CashCard savedCashCard = cashCardRepository.save(newCashCardRequest);
+    CashCard cashCardWithOwner = new CashCard(null,
+                                              newCashCardRequest.amount(),
+                                              principal.getName());
+
+    CashCard savedCashCard = cardRepository.save(cashCardWithOwner);
 
     URI locationOfNewCashCard = ucb
         .path("cashcards/{id}")
