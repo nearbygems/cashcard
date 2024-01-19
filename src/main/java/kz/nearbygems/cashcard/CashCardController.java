@@ -1,6 +1,11 @@
 package kz.nearbygems.cashcard;
 
 import java.net.URI;
+import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +20,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 class CashCardController {
 
   private final CashCardRepository cashCardRepository;
+  private final static Sort DEFAULT = Sort.by(Sort.Direction.ASC, "amount");
 
   private CashCardController(CashCardRepository cashCardRepository) {
     this.cashCardRepository = cashCardRepository;
@@ -25,6 +31,14 @@ class CashCardController {
     return cashCardRepository.findById(requestedId)
                              .map(ResponseEntity::ok)
                              .orElseGet(() -> ResponseEntity.notFound().build());
+  }
+
+  @GetMapping
+  private ResponseEntity<List<CashCard>> findAll(Pageable pageable) {
+    Page<CashCard> page = cashCardRepository.findAll(PageRequest.of(pageable.getPageNumber(),
+                                                                    pageable.getPageSize(),
+                                                                    pageable.getSortOr(DEFAULT)));
+    return ResponseEntity.ok(page.getContent());
   }
 
   @PostMapping
