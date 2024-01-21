@@ -31,7 +31,7 @@ class SecurityConfig {
 
         val users: User.UserBuilder = User.builder()
 
-        val sarah = users.username("sarah1")
+        val sarah = users.username("sarah")
                 .password(passwordEncoder.encode("abc123"))
                 .roles("CARD-OWNER")
                 .build()
