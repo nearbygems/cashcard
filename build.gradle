@@ -1,12 +1,15 @@
 plugins {
     id 'java'
-    id 'jacoco'
     id 'org.springframework.boot' version '3.1.7'
     id 'io.spring.dependency-management' version '1.1.4'
+
+    id "org.jetbrains.kotlin.plugin.spring" version "1.9.22"
+    id "org.jetbrains.kotlin.plugin.jpa" version "1.9.22"
+    id "org.jetbrains.kotlin.jvm" version "1.9.22"
 }
 
 group = 'kz.nearbygems'
-version = '0.0.1'
+version = '0.0.2'
 
 java {
     sourceCompatibility = '17'
@@ -20,8 +23,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.data:spring-data-jdbc'
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin"
     implementation 'com.h2database:h2'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    testImplementation "org.jetbrains.kotlin:kotlin-test"
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+        exclude group: 'org.mockito', module: 'mockito-core'
+    }
 }
 
 tasks.named('bootBuildImage') {
@@ -43,24 +52,5 @@ test {
 
         // Change to `true` for more verbose test output
         showStandardStreams = false
-    }
-
-    finalizedBy jacocoTestReport
-}
-
-jacoco {
-    toolVersion = "0.8.9"
-    reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
-}
-
-jacocoTestReport {
-    dependsOn test
-}
-
-jacocoTestReport {
-    reports {
-        xml.required = false
-        csv.required = false
-        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
     }
 }
