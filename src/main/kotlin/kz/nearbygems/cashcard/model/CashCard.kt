@@ -1,4 +1,4 @@
-package kz.nearbygems.cashcard
+package kz.nearbygems.cashcard.model
 
 import org.springframework.data.annotation.Id
 

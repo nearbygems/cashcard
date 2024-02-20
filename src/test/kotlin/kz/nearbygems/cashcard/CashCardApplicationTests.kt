@@ -2,10 +2,12 @@ package kz.nearbygems.cashcard
 
 import com.jayway.jsonpath.DocumentContext
 import com.jayway.jsonpath.JsonPath
+import kz.nearbygems.cashcard.model.CashCard
 import net.minidev.json.JSONArray
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
@@ -15,7 +17,7 @@ import org.springframework.test.annotation.DirtiesContext
 import java.net.URI
 import kotlin.test.Test
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class CashCardApplicationTests {
 
   @Autowired
@@ -25,7 +27,7 @@ class CashCardApplicationTests {
   fun `should return a cash card when data is saved`() {
 
     val response: ResponseEntity<String> = restTemplate.withBasicAuth("sarah", "abc123")
-            .getForEntity("/cashcards/99", String::class.java)
+        .getForEntity("/cashcards/99", String::class.java)
 
     assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
 
@@ -43,7 +45,7 @@ class CashCardApplicationTests {
   fun `should not return a cash card with an unknown id`() {
 
     val response: ResponseEntity<String> = restTemplate.withBasicAuth("sarah", "abc123")
-            .getForEntity("/cashcards/1000", String::class.java)
+        .getForEntity("/cashcards/1000", String::class.java)
 
     assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
     assertThat(response.body).isBlank()
@@ -56,14 +58,14 @@ class CashCardApplicationTests {
     val newCashCard = CashCard(null, 250.00, "sarah")
 
     val createResponse: ResponseEntity<Void> = restTemplate.withBasicAuth("sarah", "abc123")
-            .postForEntity("/cashcards", newCashCard, Void::class.java)
+        .postForEntity("/cashcards", newCashCard, Void::class.java)
 
     assertThat(createResponse.statusCode).isEqualTo(HttpStatus.CREATED)
 
     val locationOfNewCashCard: URI? = createResponse.headers.getLocation()
 
     val getResponse: ResponseEntity<String> = restTemplate.withBasicAuth("sarah", "abc123")
-            .getForEntity(locationOfNewCashCard, String::class.java)
+        .getForEntity(locationOfNewCashCard, String::class.java)
 
     assertThat(getResponse.statusCode).isEqualTo(HttpStatus.OK)
 
@@ -86,12 +88,12 @@ class CashCardApplicationTests {
     val request: HttpEntity<CashCard> = HttpEntity<CashCard>(cashCardUpdate)
 
     val response: ResponseEntity<Void> = restTemplate.withBasicAuth("sarah", "abc123")
-            .exchange("/cashcards/99", HttpMethod.PUT, request, Void::class.java)
+        .exchange("/cashcards/99", HttpMethod.PUT, request, Void::class.java)
 
     assertThat(response.statusCode).isEqualTo(HttpStatus.NO_CONTENT)
 
     val getResponse: ResponseEntity<String> = restTemplate.withBasicAuth("sarah", "abc123")
-            .getForEntity("/cashcards/99", String::class.java)
+        .getForEntity("/cashcards/99", String::class.java)
 
     assertThat(getResponse.statusCode).isEqualTo(HttpStatus.OK)
 
@@ -110,12 +112,12 @@ class CashCardApplicationTests {
   fun `should delete an existing cash card`() {
 
     val response: ResponseEntity<Void> = restTemplate.withBasicAuth("sarah", "abc123")
-            .exchange("/cashcards/99", HttpMethod.DELETE, null, Void::class.java)
+        .exchange("/cashcards/99", HttpMethod.DELETE, null, Void::class.java)
 
     assertThat(response.statusCode).isEqualTo(HttpStatus.NO_CONTENT)
 
     val getResponse: ResponseEntity<String> = restTemplate.withBasicAuth("sarah", "abc123")
-            .getForEntity("/cashcards/99", String::class.java)
+        .getForEntity("/cashcards/99", String::class.java)
 
     assertThat(getResponse.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
   }
@@ -128,7 +130,7 @@ class CashCardApplicationTests {
     val request: HttpEntity<CashCard> = HttpEntity<CashCard>(unknownCard)
 
     val response: ResponseEntity<Void> = restTemplate.withBasicAuth("sarah", "abc123")
-            .exchange("/cashcards/99999", HttpMethod.PUT, request, Void::class.java)
+        .exchange("/cashcards/99999", HttpMethod.PUT, request, Void::class.java)
 
     assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
   }
@@ -137,7 +139,7 @@ class CashCardApplicationTests {
   fun `should return all cash cards when list is requested`() {
 
     val response: ResponseEntity<String> = restTemplate.withBasicAuth("sarah", "abc123")
-            .getForEntity("/cashcards", String::class.java)
+        .getForEntity("/cashcards", String::class.java)
 
     assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
 
@@ -155,7 +157,7 @@ class CashCardApplicationTests {
   fun `should return a page of cash cards`() {
 
     val response: ResponseEntity<String> = restTemplate.withBasicAuth("sarah", "abc123")
-            .getForEntity("/cashcards?page=0&size=1", String::class.java)
+        .getForEntity("/cashcards?page=0&size=1", String::class.java)
 
     assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
 
@@ -170,7 +172,7 @@ class CashCardApplicationTests {
     val uri = "/cashcards?page=0&size=1&sort=amount,desc"
 
     val response: ResponseEntity<String> = restTemplate.withBasicAuth("sarah", "abc123")
-            .getForEntity(uri, String::class.java)
+        .getForEntity(uri, String::class.java)
 
     val documentContext: DocumentContext = JsonPath.parse(response.body)
     val read: JSONArray = documentContext.read("$[*]")
@@ -185,7 +187,7 @@ class CashCardApplicationTests {
   fun `should return a sorted page of cash cards with no parameters and use default values`() {
 
     val response: ResponseEntity<String> = restTemplate.withBasicAuth("sarah", "abc123")
-            .getForEntity("/cashcards", String::class.javaObjectType)
+        .getForEntity("/cashcards", String::class.javaObjectType)
 
     assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
 
@@ -201,12 +203,12 @@ class CashCardApplicationTests {
   fun `should not return a cash card when using bad credentials`() {
 
     val response: ResponseEntity<String> = restTemplate.withBasicAuth("BAD-USER", "abc123")
-            .getForEntity("/cashcards/99", String::class.java)
+        .getForEntity("/cashcards/99", String::class.java)
 
     assertThat(response.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
 
     val newResponse: ResponseEntity<String> = restTemplate.withBasicAuth("sarah", "BAD-PASSWORD")
-            .getForEntity("/cashcards/99", String::class.java)
+        .getForEntity("/cashcards/99", String::class.java)
 
     assertThat(newResponse.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
   }
@@ -215,7 +217,7 @@ class CashCardApplicationTests {
   fun `should not allow accessToCashCardsTheyDoNotOwn`() {
 
     val response: ResponseEntity<String> = restTemplate.withBasicAuth("sarah", "abc123")
-            .getForEntity("/cashcards/102", String::class.java)
+        .getForEntity("/cashcards/102", String::class.java)
 
     assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
   }
@@ -228,7 +230,7 @@ class CashCardApplicationTests {
     val request: HttpEntity<CashCard> = HttpEntity<CashCard>(kumarsCard)
 
     val response: ResponseEntity<Void> = restTemplate.withBasicAuth("sarah", "abc123")
-            .exchange("/cashcards/102", HttpMethod.PUT, request, Void::class.java)
+        .exchange("/cashcards/102", HttpMethod.PUT, request, Void::class.java)
 
     assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
   }
@@ -237,21 +239,21 @@ class CashCardApplicationTests {
   fun `should not delete a cash card that does not exist`() {
 
     val deleteResponse: ResponseEntity<Void> = restTemplate.withBasicAuth("sarah", "abc123")
-            .exchange("/cashcards/99999", HttpMethod.DELETE, null, Void::class.java)
+        .exchange("/cashcards/99999", HttpMethod.DELETE, null, Void::class.java)
 
     assertThat(deleteResponse.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
   }
 
   @Test
-  fun `should not allow deletion of cash cards they do notO own`() {
+  fun `should not allow deletion of cash cards they do not own`() {
 
     val deleteResponse: ResponseEntity<Void> = restTemplate.withBasicAuth("sarah", "abc123")
-            .exchange("/cashcards/102", HttpMethod.DELETE, null, Void::class.java)
+        .exchange("/cashcards/102", HttpMethod.DELETE, null, Void::class.java)
 
     assertThat(deleteResponse.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
 
     val getResponse: ResponseEntity<String> = restTemplate.withBasicAuth("kumar2", "xyz789")
-            .getForEntity("/cashcards/102", String::class.java)
+        .getForEntity("/cashcards/102", String::class.java)
 
     assertThat(getResponse.statusCode).isEqualTo(HttpStatus.OK)
   }
